@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEKTOR — AI Agents for Local Business</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Epilogue:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&display=swap');
+
+  :root {
+    --bg: #080810;
+    --surface: #0e0e1a;
+    --surface2: #13131f;
+    --surface3: #18182a;
+    --border: #1e1e30;
+    --border2: #2a2a40;
+    --text: #f0eee8;
+    --text2: #8a8898;
+    --text3: #50505e;
+    --accent: #4f6ef7;
+    --accent2: #7b8fff;
+    --accent-dim: rgba(79,110,247,0.1);
+    --accent-dim2: rgba(79,110,247,0.2);
+    --lime: #b8f040;
+    --lime-dim: rgba(184,240,64,0.1);
+    --shadow: 0 2px 20px rgba(0,0,0,0.3);
+    --shadow2: 0 8px 60px rgba(0,0,0,0.5);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Epilogue', sans-serif;
+    font-size: 16px;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 40px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,16,0.85);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    color: var(--text);
+  }
+
+  .nav-logo span { color: var(--lime); }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .nav-links a {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  .nav-cta {
+    padding: 8px 18px;
+    background: var(--lime);
+    border: none;
+    border-radius: 6px;
+    color: #080810;
+    font-family: 'Anton', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .nav-cta:hover { background: #d4ff50; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 100px 40px 60px;
+    overflow: hidden;
+  }
+
+  /* Grid lines background */
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,110,247,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,110,247,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  /* Glow blob */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 20%; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse, rgba(79,110,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-label {
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeUp 0.6s ease-out both;
+  }
+
+  .hero-label::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--lime);
+  }
+
+  .hero-title {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(56px, 10vw, 120px);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease-out 0.1s both;
+  }
+
+  .hero-title .outline {
+    -webkit-text-stroke: 1px rgba(240,238,232,0.3);
+    color: transparent;
+  }
+
+  .hero-title .accent-word { color: var(--lime); }
+
+  .hero-sub {
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--text2);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease-out 0.2s both;
+  }
+
+  .hero-sub strong { color: var(--text); font-weight: 500; }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: fadeUp 0.6s ease-out 0.3s both;
+  }
+
+  .btn-primary {
+    padding: 14px 28px;
+    background: var(--lime);
+    border: none;
+    border-radius: 8px;
+    color: #080810;
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-primary:hover { background: #d4ff50; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(184,240,64,0.3); }
+
+  .btn-ghost {
+    padding: 14px 28px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    color: var(--text2);
+    font-family: 'Epilogue', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+  /* Stats row */
+  .hero-stats {
+    display: flex;
+    gap: 48px;
+    margin-top: 80px;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+    animation: fadeUp 0.6s ease-out 0.4s both;
+  }
+
+  .stat-num {
+    font-family: 'Anton', sans-serif;
+    font-size: 36px;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .stat-num span { color: var(--lime); }
+  .stat-label { font-size: 12px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 40px;
+  }
+
+  .section-tag {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-tag::before { content: '//'; color: var(--text3); }
+
+  .section-title {
+    font-family: 'Anton', sans-serif;
+    font-size: clamp(32px, 5vw, 56px);
+    letter-spacing: 0.03em;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    color: var(--text2);
+    font-weight: 300;
+    max-width: 480px;
+    line-height: 1.7;
+    margin-bottom: 60px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .step {
+    padding: 36px 32px;
+    background: var(--surface);
+    position: relative;
+    transition: background 0.2s;
+  }
+
+  .step:hover { background: var(--surface2); }
+
+  .step-num {
+    font-family: 'Anton', sans-serif;
+    font-size: 48px;
+    color: var(--border2);
+    line-height: 1;
+    margin-bottom: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  .step-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .step-desc { font-size: 14px; color: var(--text2); line-height: 1.7; font-weight: 300; }
+
+  .step-icon {
+    position: absolute;
+    top: 32px; right: 32px;
+    font-size: 24px;
+    opacity: 0.4;
+  }
+
+  /* ── DEMOS ── */
+  .demos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .demo-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+
+  .demo-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(79,110,247,0.15);
+  }
+
+  .demo-preview {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .demo-preview::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(79,110,247,0.15), transparent);
+  }
+
+  .demo-preview.gym { background: linear-gradient(135deg, #0e1a2e, #0a1020); }
+  .demo-preview.salon { background: linear-gradient(135deg, #1a0e14, #12080e); }
+
+  .demo-info { padding: 20px 24px; }
+
+  .demo-tag {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+
+  .demo-name {
+    font-family: 'Anton', sans-serif;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .demo-desc { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 16px; }
+
+  .demo-btn {
+    padding: 8px 16px;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    color: var(--accent2);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Epilogue', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .demo-btn:hover { background: var(--accent); color: white; }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .price-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .price-card:hover { border-color: var(--border2); transform: translateY(-4px); }
+
+  .price-card.featured {
+    border-color: var(--lime);
+    background: var(--surface2);
+  }
+
+  .price-card.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: -1px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--lime);
+    color: #080810;
+    font-family: 'Anton', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    padding: 3px 12px;
+    border-radius: 0 0 6px 6px;
+  }
+
+  .price-tier {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+
+  .price-amount {
+    font-family: 'Anton', sans-serif;
+    font-size: 48px;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .price-amount sup { font-size: 20px; vertical-align: top; margin-top: 8px; display: inline-block; }
+  .price-period { font-size: 13px; color: var(--text3); margin-bottom: 24px; }
+
+  .price-features {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+
+  .price-features li {
+    font-size: 13px;
+    color: var(--text2);
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 300;
+  }
+
+  .price-features li:last-child { border-bottom: none; }
+  .price-features li::before { content: '→'; color: var(--lime); font-size: 11px; }
+
+  .price-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: 'Anton', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .price-card.featured .price-btn {
+    background: var(--lime);
+    color: #080810;
+  }
+
+  .price-card.featured .price-btn:hover { background: #d4ff50; }
+
+  .price-card:not(.featured) .price-btn {
+    background: var(--surface3);
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+
+  .price-card:not(.featured) .price-btn:hover { border-color: var(--text2); color: var(--text); }
+
+  /* ── CHAT WIDGET ── */
+  .chat-widget {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 200;
+  }
+
+  .chat-bubble-btn {
+    width: 56px; height: 56px;
+    background: var(--lime);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 4px 24px rgba(184,240,64,0.4);
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .chat-bubble-btn:hover { transform: scale(1.1); box-shadow: 0 6px 32px rgba(184,240,64,0.5); }
+
+  .chat-bubble-btn .notif {
+    position: absolute;
+    top: -2px; right: -2px;
+    width: 14px; height: 14px;
+    background: #f05050;
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    animation: pulse2 2s infinite;
+  }
+
+  @keyframes pulse2 {
+    0%,100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+  }
+
+  .chat-panel {
+    position: absolute;
+    bottom: 68px;
+    right: 0;
+    width: 340px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow2);
+    display: none;
+    flex-direction: column;
+    max-height: 500px;
+  }
+
+  .chat-panel.open { display: flex; animation: panelIn 0.25s ease-out; }
+
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .chat-head {
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .chat-head-left { display: flex; align-items: center; gap: 10px; }
+
+  .chat-head-avatar {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .chat-head-name {
+    font-family: 'Anton', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+
+  .chat-head-status { font-size: 10px; color: var(--lime); letter-spacing: 0.05em; }
+
+  .chat-close {
+    width: 24px; height: 24px;
+    background: var(--surface3);
+    border: none;
+    border-radius: 6px;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .chat-close:hover { color: var(--text); background: var(--border2); }
+
+  .chat-msgs {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .cmsg {
+    display: flex;
+    gap: 7px;
+    align-items: flex-end;
+    animation: msgIn 0.2s ease-out;
+  }
+
+  @keyframes msgIn {
+    from { opacity:0; transform: translateY(6px); }
+    to { opacity:1; transform: translateY(0); }
+  }
+
+  .cmsg.user { flex-direction: row-reverse; }
+
+  .cmsg-avatar {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  .cmsg.user .cmsg-avatar { background: var(--surface3); }
+  .cmsg.ai .cmsg-avatar { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+
+  .cmsg-bubble {
+    max-width: 82%;
+    padding: 9px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  .cmsg.user .cmsg-bubble {
+    background: var(--accent);
+    color: white;
+    border-bottom-right-radius: 3px;
+  }
+
+  .cmsg.ai .cmsg-bubble {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 3px;
+  }
+
+  .cmsg-bubble.thinking {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 12px;
+  }
+
+  .tdot {
+    width: 5px; height: 5px;
+    background: var(--text3);
+    border-radius: 50%;
+    animation: tdots 1.2s infinite;
+  }
+
+  .tdot:nth-child(2) { animation-delay: 0.15s; }
+  .tdot:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes tdots {
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; background: var(--accent2); }
+  }
+
+  .chat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+
+  .chat-chip {
+    padding: 4px 9px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    font-size: 11px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Epilogue', sans-serif;
+  }
+
+  .chat-chip:hover { border-color: var(--lime); color: var(--lime); }
+
+  .chat-input-row {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 7px;
+    align-items: center;
+  }
+
+  .chat-in {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Epilogue', sans-serif;
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .chat-in:focus { border-color: var(--accent); }
+  .chat-in::placeholder { color: var(--text3); }
+
+  .chat-send-btn {
+    width: 34px; height: 34px;
+    background: var(--lime);
+    border: none;
+    border-radius: 8px;
+    color: #080810;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    font-weight: 700;
+  }
+
+  .chat-send-btn:hover { background: #d4ff50; }
+  .chat-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── CONTACT ── */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .contact-cta {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .contact-cta-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .contact-cta-btn:hover {
+    border-color: var(--lime);
+    background: var(--surface2);
+    transform: translateX(4px);
+  }
+
+  .contact-cta-btn .cta-icon {
+    font-size: 24px;
+    width: 48px; height: 48px;
+    background: var(--surface3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .contact-cta-btn .cta-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 3px;
+  }
+
+  .contact-cta-btn .cta-value {
+    font-family: 'Anton', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+
+  .contact-info { padding-top: 8px; }
+
+  .contact-info h3 {
+    font-family: 'Anton', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 16px;
+    line-height: 1.1;
+  }
+
+  .contact-info p {
+    font-size: 15px;
+    color: var(--text2);
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 32px;
+  }
+
+  .contact-detail {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--text2);
+  }
+
+  .contact-detail:last-child { border-bottom: none; }
+  .contact-detail .icon { font-size: 16px; }
+  .contact-detail strong { color: var(--text); font-weight: 500; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 24px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-logo {
+    font-family: 'Anton', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+  }
+
+  .footer-logo span { color: var(--lime); }
+  .footer-copy { font-size: 12px; color: var(--text3); }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    position: relative;
+    z-index: 1;
+    height: 1px;
+    background: var(--border);
+    margin: 0 40px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">VEK<span>T</span>OR</div>
+  <div class="nav-links">
+    <a href="#how">How It Works</a>
+    <a href="#demos">Demos</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <a href="#contact" class="nav-cta">Get Started</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">AI Agents for Local Business</div>
+  <div class="hero-title">
+    YOUR BUSINESS.<br>
+    <span class="outline">ALWAYS</span><br>
+    <span class="accent-word">ONLINE.</span>
+  </div>
+  <p class="hero-sub">
+    We build <strong>custom AI agents</strong> for local businesses that answer questions, handle bookings, and convert customers — <strong>24 hours a day.</strong>
+  </p>
+  <div class="hero-actions">
+    <a href="#demos" class="btn-primary">See Live Demos</a>
+    <a href="#contact" class="btn-ghost">Get a Free Agent</a>
+  </div>
+  <div class="hero-stats">
+    <div>
+      <div class="stat-num">24<span>/7</span></div>
+      <div class="stat-label">Always Available</div>
+    </div>
+    <div>
+      <div class="stat-num">48<span>hr</span></div>
+      <div class="stat-label">Setup Time</div>
+    </div>
+    <div>
+      <div class="stat-num">$0<span> setup</span></div>
+      <div class="stat-label">No Upfront Cost</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-tag">Process</div>
+  <div class="section-title">THREE STEPS.<br>THAT'S IT.</div>
+  <p class="section-sub">No tech knowledge needed. No long contracts. We handle everything.</p>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-icon">💬</div>
+      <div class="step-num">01</div>
+      <div class="step-title">YOU TELL US</div>
+      <p class="step-desc">Send us your business info — services, hours, prices, FAQs. A quick 10 minute conversation is all we need.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">⚡</div>
+      <div class="step-num">02</div>
+      <div class="step-title">WE BUILD IT</div>
+      <p class="step-desc">We build your custom AI agent in 48 hours. It knows everything about your business and handles customer questions automatically.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">🚀</div>
+      <div class="step-num">03</div>
+      <div class="step-title">YOU PROFIT</div>
+      <p class="step-desc">Your agent goes live on your website or as a link. Customers get instant answers. You stop answering the same questions all day.</p>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DEMOS -->
+<section id="demos">
+  <div class="section-tag">Live Demos</div>
+  <div class="section-title">SEE IT IN<br>ACTION.</div>
+  <p class="section-sub">Real working demos. Click through and talk to the agent — this is exactly what your customers would experience.</p>
+  <div class="demos-grid">
+    <div class="demo-card" onclick="window.open('gym-agent.html', '_blank')">
+      <div class="demo-preview gym">🏋️</div>
+      <div class="demo-info">
+        <div class="demo-tag">Live Demo · Fitness</div>
+        <div class="demo-name">GYM & FITNESS</div>
+        <p class="demo-desc">Handles membership pricing, class bookings, trainer info, hours and FAQs. Works for any gym or fitness studio.</p>
+        <button class="demo-btn">Try This Demo →</button>
+      </div>
+    </div>
+    <div class="demo-card" onclick="window.open('salon-agent.html', '_blank')">
+      <div class="demo-preview salon">✂️</div>
+      <div class="demo-info">
+        <div class="demo-tag">Live Demo · Beauty</div>
+        <div class="demo-name">SALON & BEAUTY</div>
+        <p class="demo-desc">Answers service questions, shows pricing, introduces stylists, and handles appointment booking requests.</p>
+        <button class="demo-btn">Try This Demo →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-tag">Pricing</div>
+  <div class="section-title">SIMPLE.<br>TRANSPARENT.</div>
+  <p class="section-sub">No setup fees. No long-term contracts. Cancel anytime.</p>
+  <div class="pricing-grid">
+    <div class="price-card">
+      <div class="price-tier">Starter</div>
+      <div class="price-amount"><sup>$</sup>79</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li>Custom AI agent</li>
+        <li>FAQ & hours handling</li>
+        <li>Mobile friendly</li>
+        <li>Setup in 48 hours</li>
+        <li>Email support</li>
+      </ul>
+      <button class="price-btn" onclick="document.getElementById('contact').scrollIntoView()">GET STARTED</button>
+    </div>
+    <div class="price-card featured">
+      <div class="price-tier">Growth</div>
+      <div class="price-amount"><sup>$</sup>149</div>
+      <div class="price-period">per month</div>
+      <ul class="price-features">
+        <li>Everything in Starter</li>
+        <li>Booking & scheduling</li>
+        <li>Promotions & offers</li>
+        <li>Monthly updates</li>
+        <li>Priority support</li>
+      </ul>
+      <button class="price-btn" onclick="document.getElementById('contact').scrollIntoView()">GET STARTED</button>
+    </div>
+    <div class="price-card">
+      <div class="price-tier">Custom</div>
+      <div class="price-amount">Let's<br><span style="font-size:32px">Talk</span></div>
+      <div class="price-period">custom quote</div>
+      <ul class="price-features">
+        <li>Multiple locations</li>
+        <li>Website integration</li>
+        <li>Custom features</li>
+        <li>Team training</li>
+        <li>Dedicated support</li>
+      </ul>
+      <button class="price-btn" onclick="document.getElementById('contact').scrollIntoView()">CONTACT US</button>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-tag">Contact</div>
+  <div class="contact-grid">
+    <div class="contact-cta">
+      <div class="section-title" style="margin-bottom:8px">REACH OUT.<br>WE'LL BUILD<br>YOUR DEMO.</div>
+      <p style="font-size:14px; color:var(--text2); margin-bottom:8px; font-weight:300;">No forms. No fluff. Just message us directly and we'll have a free custom demo built for your business within 48 hours.</p>
+      <a href="https://instagram.com/vktr.io" target="_blank" class="contact-cta-btn">
+        <div class="cta-icon">📸</div>
+        <div>
+          <div class="cta-label">Instagram</div>
+          <div class="cta-value">@vktr.io</div>
+        </div>
+      </a>
+      <a href="mailto:shuxvr@gmail.com" class="contact-cta-btn">
+        <div class="cta-icon">📧</div>
+        <div>
+          <div class="cta-label">Email</div>
+          <div class="cta-value">shuxvr@gmail.com</div>
+        </div>
+      </a>
+    </div>
+    <div class="contact-info">
+      <h3>WE BUILD.<br>YOU GROW.</h3>
+      <p>Based in Harford County, MD. We work with local businesses to help them stop losing customers to unanswered questions and missed messages.</p>
+      <div class="contact-detail"><span class="icon">📍</span><span>Harford County, Maryland</span></div>
+      <div class="contact-detail"><span class="icon">📧</span><span><a href="mailto:shuxvr@gmail.com" style="color:var(--text2); text-decoration:none;">shuxvr@gmail.com</a></span></div>
+      <div class="contact-detail"><span class="icon">📸</span><span><a href="https://instagram.com/vktr.io" target="_blank" style="color:var(--text2); text-decoration:none;">@vktr.io</a></span></div>
+      <div class="contact-detail"><span class="icon">⚡</span><span><strong>48 hour</strong> turnaround</span></div>
+      <div class="contact-detail"><span class="icon">🎁</span><span><strong>Free demo</strong> built for your business</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">VEK<span>T</span>OR</div>
+  <div class="footer-copy">© 2026 Vektor. Harford County, MD.</div>
+</footer>
+
+<!-- CHAT WIDGET -->
+<div class="chat-widget">
+  <div class="chat-panel" id="chatPanel">
+    <div class="chat-head">
+      <div class="chat-head-left">
+        <div class="chat-head-avatar">⚡</div>
+        <div>
+          <div class="chat-head-name">VEKTOR AI</div>
+          <div class="chat-head-status">● Online now</div>
+        </div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-input-row">
+      <input class="chat-in" id="chatIn" placeholder="Ask us anything..." onkeydown="if(event.key==='Enter') sendWidgetMsg()">
+      <button class="chat-send-btn" id="chatSendBtn" onclick="sendWidgetMsg()">↑</button>
+    </div>
+  </div>
+  <button class="chat-bubble-btn" onclick="toggleChat()">
+    💬
+    <div class="notif"></div>
+  </button>
+</div>
+
+<script>
+const GROQ_KEY = 'PASTE_YOUR_NEW_GROQ_KEY_HERE';
+
+const VEKTOR_SYSTEM = `You are the AI sales assistant for VEKTOR, an AI agent agency based in Harford County, Maryland. You are sharp, confident, and helpful. Keep responses short — 2-3 sentences max.
+
+WHAT VEKTOR DOES:
+- Builds custom AI chat agents for local businesses (gyms, salons, restaurants, etc.)
+- The agent handles customer FAQs, pricing questions, bookings and hours automatically 24/7
+- Built in 48 hours, no setup fee, month-to-month
+
+PRICING:
+- Starter: $79/month — FAQ handling, hours, basic info
+- Growth: $149/month — everything + bookings, promotions, monthly updates
+- Custom: contact for quote — multiple locations, website integration
+
+PROCESS:
+- Business owner contacts Vektor
+- We collect their info (services, hours, prices, FAQs)
+- We build a custom agent in 48 hours
+- Goes live on their website or as a shareable link
+
+DEMOS:
+- Live gym demo and salon demo are on the website
+- We build a FREE custom demo for any interested business before they commit
+
+KEY SELLING POINTS:
+- No tech knowledge needed
+- No long contracts, cancel anytime
+- Local Harford County business
+- 48 hour turnaround
+- Free demo first
+
+If someone asks about pricing, quote the plans. If they want a demo built for their business, tell them to fill out the contact form. Be confident and concise.`;
+
+let widgetHistory = [];
+let chatOpen = false;
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const panel = document.getElementById('chatPanel');
+  panel.classList.toggle('open', chatOpen);
+
+  // Remove notif on open
+  const notif = document.querySelector('.notif');
+  if (chatOpen && notif) notif.style.display = 'none';
+
+  // Init greeting
+  if (chatOpen && document.getElementById('chatMsgs').children.length === 0) {
+    addWidgetMsg('ai', "Hey! I'm the Vektor AI. Ask me anything about our agents, pricing, or how it works.", false, [
+      "How much does it cost?",
+      "How fast is setup?",
+      "See a demo",
+      "Get a free demo"
+    ]);
+  }
+}
+
+function addWidgetMsg(role, text, thinking = false, chips = []) {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = 'cmsg ' + (role === 'user' ? 'user' : 'ai');
+
+  if (thinking) {
+    div.innerHTML = `<div class="cmsg-avatar">⚡</div><div class="cmsg-bubble thinking"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div>`;
+  } else {
+    const chipsHTML = chips.length ? `<div class="chat-chips">${chips.map(c => `<span class="chat-chip" onclick="widgetQuickAsk('${c}')">${c}</span>`).join('')}</div>` : '';
+    div.innerHTML = `
+      <div class="cmsg-avatar">${role === 'user' ? '👤' : '⚡'}</div>
+      <div class="cmsg-bubble">${text.replace(/\n/g, '<br>')}${chipsHTML}</div>`;
+  }
+
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function widgetQuickAsk(text) {
+  document.getElementById('chatIn').value = text;
+  sendWidgetMsg();
+}
+
+async function sendWidgetMsg() {
+  const input = document.getElementById('chatIn');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  addWidgetMsg('user', text);
+  widgetHistory.push({ role: 'user', content: text });
+
+  document.getElementById('chatSendBtn').disabled = true;
+  const thinking = addWidgetMsg('ai', '', true);
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: VEKTOR_SYSTEM },
+          ...widgetHistory
+        ],
+        temperature: 0.7,
+        max_tokens: 300
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || "Something went wrong. Fill out the contact form and we'll reach out directly!";
+    widgetHistory.push({ role: 'assistant', content: reply });
+
+    thinking.querySelector('.cmsg-bubble').classList.remove('thinking');
+    thinking.querySelector('.cmsg-bubble').innerHTML = reply.replace(/\n/g, '<br>');
+    document.getElementById('chatMsgs').scrollTop = document.getElementById('chatMsgs').scrollHeight;
+
+  } catch(e) {
+    thinking.querySelector('.cmsg-bubble').classList.remove('thinking');
+    thinking.querySelector('.cmsg-bubble').textContent = 'Fill out the contact form and we will reach out shortly!';
+  } finally {
+    document.getElementById('chatSendBtn').disabled = false;
+  }
+}
+
+function handleFormSubmit() {
+  const btn = document.querySelector('.form-submit');
+  btn.textContent = '✓ SENT — WE\'LL BE IN TOUCH SOON';
+  btn.style.background = '#3a5fd4';
+  btn.style.color = 'white';
+  btn.disabled = true;
+}
+</script>
+</body>
+</html>
