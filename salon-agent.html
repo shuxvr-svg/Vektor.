@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAISON Studio — AI Concierge</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  :root {
+    --bg: #f9f6f2;
+    --white: #ffffff;
+    --surface: #f2ede8;
+    --surface2: #ece5dc;
+    --border: #e0d8ce;
+    --border2: #cfc5b8;
+    --text: #1c1814;
+    --text2: #6b5f52;
+    --text3: #a8998a;
+    --accent: #c17f4a;
+    --accent2: #d4956a;
+    --accent-dim: rgba(193,127,74,0.1);
+    --accent-dim2: rgba(193,127,74,0.2);
+    --rose: #d4607a;
+    --rose-dim: rgba(212,96,122,0.1);
+    --green: #5a8a6a;
+    --green-dim: rgba(90,138,106,0.1);
+    --shadow: 0 2px 16px rgba(28,24,20,0.06);
+    --shadow2: 0 8px 40px rgba(28,24,20,0.1);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--text);
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .brand-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    color: var(--white);
+    letter-spacing: 0.12em;
+    line-height: 1;
+  }
+
+  .brand-logo span {
+    color: var(--accent2);
+  }
+
+  .brand-tag {
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border-left: 1px solid #333;
+    padding-left: 14px;
+    font-weight: 300;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(90,138,106,0.15);
+    border: 1px solid rgba(90,138,106,0.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #7ab88a;
+    letter-spacing: 0.05em;
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    background: #7ab88a;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr 240px;
+    gap: 20px;
+    flex: 1;
+    max-width: 1080px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 24px 20px;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.15em;
+    color: var(--text3);
+    margin-bottom: 14px;
+  }
+
+  /* ── LEFT SIDEBAR ── */
+  .sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+  .hours-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+
+  .hours-row:last-child { border-bottom: none; }
+  .hours-row .day { color: var(--text2); font-weight: 400; }
+  .hours-row .time { color: var(--text); font-weight: 500; }
+  .hours-row .closed { color: var(--text3); }
+
+  /* Service menu */
+  .service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .service-item:last-child { border-bottom: none; }
+  .service-item:hover .svc-name { color: var(--accent); }
+
+  .svc-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .svc-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .svc-price { font-size: 13px; font-weight: 600; color: var(--accent); }
+
+  /* Quick asks */
+  .quick-btn {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.15s;
+    margin-bottom: 6px;
+    font-weight: 400;
+  }
+
+  .quick-btn:last-child { margin-bottom: 0; }
+  .quick-btn:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  /* ── CHAT ── */
+  .chat-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow2);
+    overflow: hidden;
+    min-height: 580px;
+  }
+
+  .chat-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(135deg, #1c1814 0%, #2d2420 100%);
+  }
+
+  .agent-avatar {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .agent-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    color: var(--white);
+    letter-spacing: 0.1em;
+  }
+
+  .agent-role { font-size: 11px; color: var(--text3); letter-spacing: 0.05em; }
+
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .msg {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    animation: msgIn 0.2s ease-out;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user { flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  .msg.user .msg-avatar { background: var(--text); color: white; font-size: 11px; }
+  .msg.ai .msg-avatar { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; }
+
+  .msg-bubble {
+    max-width: 80%;
+    padding: 11px 15px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .msg.user .msg-bubble {
+    background: var(--text);
+    color: white;
+    border-bottom-right-radius: 4px;
+  }
+
+  .msg.ai .msg-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+
+  .msg-bubble.thinking {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 14px 16px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--text3);
+    animation: boing 1.2s infinite;
+  }
+
+  .dot:nth-child(2) { animation-delay: 0.15s; }
+  .dot:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes boing {
+    0%,60%,100% { transform: translateY(0); }
+    30% { transform: translateY(-5px); background: var(--accent); }
+  }
+
+  /* Chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .chip {
+    padding: 5px 12px;
+    background: var(--white);
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .chip:hover { background: var(--accent); color: white; }
+
+  /* Booking widget */
+  .booking-widget {
+    background: var(--white);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 10px;
+  }
+
+  .bw-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .time-slot {
+    padding: 7px 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+  }
+
+  .time-slot:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .time-slot.taken { color: var(--text3); cursor: not-allowed; font-weight: 400; text-decoration: line-through; }
+
+  .book-btn {
+    width: 100%;
+    padding: 9px;
+    background: var(--text);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .book-btn:hover { background: var(--accent); }
+
+  /* Input */
+  .chat-input-row {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+    background: var(--surface);
+  }
+
+  .chat-input {
+    flex: 1;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    resize: none;
+    min-height: 42px;
+    max-height: 100px;
+    transition: border-color 0.2s;
+    font-weight: 400;
+  }
+
+  .chat-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim2); }
+  .chat-input::placeholder { color: var(--text3); }
+
+  .send-btn {
+    width: 42px; height: 42px;
+    background: var(--text);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+
+  .send-btn:hover { background: var(--accent); transform: scale(1.05); }
+  .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── RIGHT SIDEBAR ── */
+  .right-sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+  .stylist-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .stylist-card:last-child { border-bottom: none; }
+  .stylist-card:hover .stylist-name { color: var(--accent); }
+
+  .stylist-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 0.05em;
+  }
+
+  .stylist-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .stylist-spec { font-size: 11px; color: var(--text3); }
+
+  /* Reviews */
+  .review-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .review-item:last-child { border-bottom: none; }
+  .review-stars { color: var(--accent); font-size: 11px; margin-bottom: 3px; }
+  .review-text { font-size: 12px; color: var(--text2); line-height: 1.5; font-style: italic; }
+  .review-author { font-size: 11px; color: var(--text3); margin-top: 3px; font-weight: 500; }
+
+  /* Promo banner */
+  .promo-card {
+    background: linear-gradient(135deg, var(--text) 0%, #2d2420 100%);
+    border-radius: 14px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .promo-card::before {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 80px; height: 80px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0.15;
+  }
+
+  .promo-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .promo-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: white;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .promo-desc { font-size: 11px; color: var(--text3); margin-bottom: 10px; line-height: 1.4; }
+
+  .promo-btn {
+    padding: 7px 14px;
+    background: var(--accent);
+    border: none;
+    border-radius: 7px;
+    color: white;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .promo-btn:hover { background: var(--accent2); }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar, .right-sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">MAISON <span>Studio</span></div>
+    <div class="brand-tag">Hair · Color · Beauty</div>
+  </div>
+  <div class="header-right">
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      Concierge Online
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">Hours</div>
+      <div class="hours-row"><span class="day">Monday</span><span class="time closed">Closed</span></div>
+      <div class="hours-row"><span class="day">Tue – Wed</span><span class="time">10am – 6pm</span></div>
+      <div class="hours-row"><span class="day">Thu – Fri</span><span class="time">10am – 8pm</span></div>
+      <div class="hours-row"><span class="day">Saturday</span><span class="time">9am – 5pm</span></div>
+      <div class="hours-row"><span class="day">Sunday</span><span class="time closed">Closed</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Services</div>
+      <div class="service-item" onclick="quickAsk('How much is a haircut?')">
+        <div><div class="svc-name">Haircut & Style</div><div class="svc-sub">Cut, blowout, finish</div></div>
+        <div class="svc-price">$65+</div>
+      </div>
+      <div class="service-item" onclick="quickAsk('Tell me about full color services')">
+        <div><div class="svc-name">Full Color</div><div class="svc-sub">Single process</div></div>
+        <div class="svc-price">$95+</div>
+      </div>
+      <div class="service-item" onclick="quickAsk('How much does balayage cost?')">
+        <div><div class="svc-name">Balayage</div><div class="svc-sub">Hand-painted color</div></div>
+        <div class="svc-price">$175+</div>
+      </div>
+      <div class="service-item" onclick="quickAsk('What highlights do you offer?')">
+        <div><div class="svc-name">Highlights</div><div class="svc-sub">Full or partial</div></div>
+        <div class="svc-price">$120+</div>
+      </div>
+      <div class="service-item" onclick="quickAsk('Tell me about keratin treatments')">
+        <div><div class="svc-name">Keratin Treatment</div><div class="svc-sub">Smoothing & frizz control</div></div>
+        <div class="svc-price">$250+</div>
+      </div>
+      <div class="service-item" onclick="quickAsk('How much is a blowout only?')">
+        <div><div class="svc-name">Blowout</div><div class="svc-sub">Style only, no cut</div></div>
+        <div class="svc-price">$45+</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick Questions</div>
+      <button class="quick-btn" onclick="quickAsk('I want to book an appointment')">📅 Book Appointment</button>
+      <button class="quick-btn" onclick="quickAsk('What are your prices?')">💰 Pricing</button>
+      <button class="quick-btn" onclick="quickAsk('Do you do bridal hair?')">💍 Bridal Services</button>
+      <button class="quick-btn" onclick="quickAsk('What products do you use?')">✨ Products Used</button>
+      <button class="quick-btn" onclick="quickAsk('Do you offer consultations?')">💬 Free Consultation</button>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-panel">
+    <div class="chat-header">
+      <div class="agent-avatar">✦</div>
+      <div>
+        <div class="agent-name">Maison Concierge</div>
+        <div class="agent-role">Bookings · Services · Pricing · Availability</div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div class="chat-input-row">
+      <textarea class="chat-input" id="chatInput" placeholder="Ask about services, pricing, or book an appointment..." rows="1" onkeydown="handleKey(event)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDEBAR -->
+  <div class="right-sidebar">
+
+    <div class="promo-card">
+      <div class="promo-label">May Special</div>
+      <div class="promo-title">First Visit 20% Off</div>
+      <div class="promo-desc">New clients get 20% off any service. Book this week to redeem.</div>
+      <button class="promo-btn" onclick="quickAsk('I want to claim the new client discount')">Claim Offer</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Our Stylists</div>
+      <div class="stylist-card" onclick="quickAsk('I want to book with Jade')">
+        <div class="stylist-avatar" style="background: linear-gradient(135deg, #c17f4a, #d4956a)">J</div>
+        <div>
+          <div class="stylist-name">Jade Moreau</div>
+          <div class="stylist-spec">Color specialist · Balayage</div>
+        </div>
+      </div>
+      <div class="stylist-card" onclick="quickAsk('I want to book with Riley')">
+        <div class="stylist-avatar" style="background: linear-gradient(135deg, #d4607a, #e07a90)">R</div>
+        <div>
+          <div class="stylist-name">Riley Kim</div>
+          <div class="stylist-spec">Cuts · Texture · Extensions</div>
+        </div>
+      </div>
+      <div class="stylist-card" onclick="quickAsk('I want to book with Marcus')">
+        <div class="stylist-avatar" style="background: linear-gradient(135deg, #5a8a6a, #7aaa8a)">M</div>
+        <div>
+          <div class="stylist-name">Marcus Wells</div>
+          <div class="stylist-spec">Men's cuts · Fades · Styling</div>
+        </div>
+      </div>
+      <div class="stylist-card" onclick="quickAsk('I want to book with Sofia')">
+        <div class="stylist-avatar" style="background: linear-gradient(135deg, #6a6aca, #8a8aea)">S</div>
+        <div>
+          <div class="stylist-name">Sofia Reyes</div>
+          <div class="stylist-spec">Bridal · Updos · Color</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Reviews</div>
+      <div class="review-item">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">Jade is an absolute artist. My balayage came out better than the inspo photo.</div>
+        <div class="review-author">— Priya T.</div>
+      </div>
+      <div class="review-item">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">Best salon in the area, hands down. The vibe, the service, everything is perfect.</div>
+        <div class="review-author">— Lauren M.</div>
+      </div>
+      <div class="review-item">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">Marcus gave me the best cut I've had in years. Already booked my next visit.</div>
+        <div class="review-author">— Chris D.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const GROQ_KEY = 'PASTE_YOUR_NEW_GROQ_KEY_HERE';
+
+const SYSTEM_PROMPT = `You are the AI concierge for MAISON Studio, a trendy modern hair salon. You are warm, stylish, and concise. You handle bookings, answer questions about services, pricing, and stylists.
+
+SALON INFO:
+- Name: MAISON Studio
+- Address: 412 Westwood Lane, Suite 8, Bel Air, MD
+- Phone: (443) 882-4100
+- Email: hello@maisonstudio.com
+- Instagram: @maisonstudio
+- Hours: Closed Mon, Tue-Wed 10am-6pm, Thu-Fri 10am-8pm, Sat 9am-5pm, Closed Sun
+
+SERVICES & PRICING:
+- Haircut & Style: $65+ (includes blowout and finish)
+- Full Color (single process): $95+
+- Balayage: $175+ (hand-painted, 2-3 hours)
+- Highlights full: $145+, partial: $120+
+- Keratin Treatment: $250+ (smoothing, lasts 3-4 months)
+- Blowout only: $45+
+- Deep conditioning treatment: $35
+- Bridal hair (trial + day of): $300+
+- Men's cut: $45+
+- Kids cut (under 12): $35
+
+STYLISTS:
+- Jade Moreau: Color specialist, balayage expert, 8 years experience. Books up fast, recommend booking 2 weeks ahead.
+- Riley Kim: Cuts, texture, extensions. Great with curly and textured hair.
+- Marcus Wells: Men's cuts, fades, styling. Also does women's cuts.
+- Sofia Reyes: Bridal specialist, updos, color. Only stylist doing bridal packages.
+
+BOOKING:
+- Book online at maisonstudio.com/book or call (443) 882-4100
+- New clients get 20% off first visit (May special)
+- Free 15-min consultation available for color services
+- Cancellations need 24 hours notice
+
+PRODUCTS:
+- Oribe, Kerastase, and Kevin Murphy products used and sold in salon
+
+RULES:
+- Keep responses short and warm — 2-3 sentences max unless listing info
+- Be stylish but approachable
+- Always mention the new client discount if they seem like a new client
+- For complex color questions suggest a free consultation`;
+
+const chatHistory = [];
+
+window.onload = () => {
+  addMsg('ai', "Welcome to MAISON Studio. I'm here to help with bookings, services, pricing, or any questions you have. What can I help you with today?", false, [
+    "Book an appointment",
+    "See pricing",
+    "Meet our stylists",
+    "New client discount"
+  ]);
+};
+
+function addMsg(role, text, thinking = false, chips = []) {
+  const messages = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+
+  if (thinking) {
+    div.innerHTML = `
+      <div class="msg-avatar">✦</div>
+      <div class="msg-bubble thinking">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>`;
+  } else {
+    const chipsHTML = chips.length ? `<div class="chips">${chips.map(c => `<span class="chip" onclick="quickAsk('${c}')">${c}</span>`).join('')}</div>` : '';
+    div.innerHTML = `
+      <div class="msg-avatar">${role === 'user' ? '👤' : '✦'}</div>
+      <div class="msg-bubble">${text.replace(/\n/g, '<br>')}${chipsHTML}</div>`;
+  }
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+  return div;
+}
+
+function quickAsk(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  addMsg('user', text);
+  chatHistory.push({ role: 'user', content: text });
+
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.disabled = true;
+  const thinkingEl = addMsg('ai', '', true);
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...chatHistory
+        ],
+        temperature: 0.7,
+        max_tokens: 400
+      })
+    });
+
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || "I'm sorry, I couldn't get a response. Please try again or call us at (443) 882-4100.";
+
+    chatHistory.push({ role: 'assistant', content: reply });
+
+    thinkingEl.querySelector('.msg-bubble').classList.remove('thinking');
+    thinkingEl.querySelector('.msg-bubble').innerHTML = reply.replace(/\n/g, '<br>');
+
+    // Smart chips
+    let chips = [];
+    const lower = reply.toLowerCase();
+    if (lower.includes('book') || lower.includes('appointment')) {
+      chips = ['Book with Jade', 'Book with Riley', 'Book with Sofia'];
+    } else if (lower.includes('color') || lower.includes('balayage') || lower.includes('highlight')) {
+      chips = ['Book a consultation', 'See color pricing', 'Meet Jade'];
+    } else if (lower.includes('price') || lower.includes('cost') || lower.includes('$')) {
+      chips = ['Book now', 'New client discount', 'Free consultation'];
+    }
+
+    if (chips.length) {
+      const chipsDiv = document.createElement('div');
+      chipsDiv.className = 'chips';
+      chipsDiv.innerHTML = chips.map(c => `<span class="chip" onclick="quickAsk('${c}')">${c}</span>`).join('');
+      thinkingEl.querySelector('.msg-bubble').appendChild(chipsDiv);
+    }
+
+    document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+
+  } catch (e) {
+    thinkingEl.querySelector('.msg-bubble').classList.remove('thinking');
+    thinkingEl.querySelector('.msg-bubble').textContent = 'Something went wrong. Please call us at (443) 882-4100.';
+    console.error(e);
+  } finally {
+    sendBtn.disabled = false;
+    input.focus();
+  }
+}
+</script>
+</body>
+</html>
